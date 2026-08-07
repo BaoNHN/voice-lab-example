@@ -43,12 +43,13 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 voice_client = VoiceStationClient()
 
-ACTIVE_HOTWORDS = []
+ACTIVE_PACK = None
 _packs = glob.glob(os.path.join(STT_PACK_DIR, "*.zip"))
 if _packs:
-    ACTIVE_HOTWORDS = local_stt.load_hotwords_from_pack(_packs[0])
+    ACTIVE_PACK = local_stt.load_pack(_packs[0])
+    kind = "Tier 2 LoRA adapter" if ACTIVE_PACK.get("adapter_dir") else "Tier 1 hotwords"
     print(f"[voice-lab-example] Loaded STT Lab pack: {os.path.basename(_packs[0])} "
-          f"({len(ACTIVE_HOTWORDS)} hotwords)")
+          f"({kind}, {len(ACTIVE_PACK['hotwords'])} hotwords)")
 else:
     print("[voice-lab-example] No .stt-pack.zip found in stt_pack/ — plain transcription.")
 
@@ -77,7 +78,7 @@ async def transcribe_route(audio: UploadFile = File(...), language: str = Form("
     try:
         result = voice_client.transcribe_local(
             audio.filename, content, mime=audio.content_type, language=language,
-            hotwords=ACTIVE_HOTWORDS,
+            pack=ACTIVE_PACK,
         )
     except VoiceStationError as e:
         return {"status": "error", "text": e.message}
