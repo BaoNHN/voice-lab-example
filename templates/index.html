@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>voice-lab-example</title>
+</head>
+<body>
+<div class="layout">
+  <main class="chat-container">
+    <div class="header">
+      <div class="header-center">voice-lab-example</div>
+    </div>
+    <div class="container" id="mainContainer">
+
+      <!-- Welcome screen (shown when no messages) -->
+      <div id="welcome-screen">
+        <h1 class="welcome-title">Demo: mic → local Whisper → retrieval chat</h1>
+        <p class="welcome-subtitle">Trả lời lấy từ bộ dữ liệu hội thoại tiếng Việt (retrieval thật, không phải câu trả lời cứng)</p>
+        <div class="suggestion-chips">
+          <button class="chip" data-prompt="Tại sao giấc ngủ lại quan trọng?">💡 Tại sao giấc ngủ lại quan trọng?</button>
+          <button class="chip" data-prompt="Nhắc tôi gọi điện cho mẹ.">📞 Nhắc tôi gọi điện cho mẹ</button>
+        </div>
+      </div>
+
+      <!-- Chatbox (shown when chatting) -->
+      <div id="chatbox" class="chatbox"></div>
+
+      <!-- Input bar -->
+      <div class="input-area">
+        <button id="micButton" title="Ghi âm câu hỏi">🎤</button>
+        <input id="chatInput" type="text" placeholder="Nhập câu hỏi, hoặc bấm 🎤 để nói…"/>
+        <button id="sendButton">Gửi</button>
+      </div>
+
+      <div id="disclaimer">Demo clone-voice-client local STT — Whisper chạy trong process của app này, không gọi qua clone-voice-station.</div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

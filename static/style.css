@@ -1,0 +1,220 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #FAFAFA;
+    color: #212121;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    overflow: hidden;
+}
+
+.header {
+    background-color: #6200EA;
+    color: white;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-center {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    background-color: white;
+    min-height: 0;
+}
+
+.container.is-chatting {
+    justify-content: flex-start;
+}
+
+/* ── Welcome screen ─────────────────────────────── */
+#welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+}
+
+.welcome-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: #212121;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.welcome-subtitle {
+    font-size: 15px;
+    color: #757575;
+    margin: 0 0 28px 0;
+    text-align: center;
+}
+
+.suggestion-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.chip {
+    padding: 9px 16px;
+    border: 1.5px solid #E0E0E0;
+    border-radius: 20px;
+    background: white;
+    color: #424242;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.chip:hover {
+    border-color: #6200EA;
+    background: #F3E5F5;
+    color: #6200EA;
+}
+
+.container.is-chatting #welcome-screen {
+    display: none;
+}
+
+/* ── Chatbox ────────────────────────────────────── */
+.chatbox {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+#chatbox {
+    display: none;
+}
+
+.container.is-chatting #chatbox {
+    display: flex;
+}
+
+/* ── Disclaimer ─────────────────────────────────── */
+#disclaimer {
+    text-align: center;
+    font-size: 12px;
+    color: #9E9E9E;
+    padding: 6px 16px 8px;
+    background: white;
+}
+
+/* Message bubbles */
+.chat-message {
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #6200EA;
+    color: white;
+    border-top-left-radius: 0;
+}
+
+.assistant-message {
+    align-self: flex-start;
+    background-color: #E0E0E0;
+    color: #212121;
+    border-top-right-radius: 0;
+}
+
+/* ── Input area ──────────────────────────────────── */
+.input-area {
+    padding: 10px;
+    border-top: 1px solid #E0E0E0;
+    background-color: #F5F5F5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.container:not(.is-chatting) .input-area {
+    max-width: 640px;
+    width: 90%;
+    margin: 0 auto;
+    border-top: none;
+    background: transparent;
+    padding: 0;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #E0E0E0;
+    border-radius: 20px;
+    transition: border-color 0.3s;
+}
+
+.input-area input:focus {
+    outline: none;
+    border-color: #6200EA;
+}
+
+.input-area button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #6200EA;
+    color: white;
+    cursor: pointer;
+}
+
+.container:not(.is-chatting) .input-area button {
+    padding: 14px 18px;
+    border-radius: 999px;
+}
+
+.input-area button:hover {
+    background-color: #3700B3;
+}
+
+.input-area input:disabled,
+.input-area button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+#micButton {
+    background-color: #D63B3B;
+}
+
+#micButton:hover {
+    background-color: #B71C1C;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
