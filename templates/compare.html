@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/compare.css"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>voice-lab-example — So sánh nhập tay vs giọng nói</title>
+</head>
+<body>
+<div class="layout">
+  <main class="chat-container">
+    <div class="header">
+      <div class="header-center">So sánh: nhập tay vs giọng nói</div>
+      <a class="header-link" href="/">← Về chat demo</a>
+    </div>
+
+    <div class="compare-page">
+      <p class="compare-intro">
+        Gõ tay ở ô đầu tiên, hoặc bấm nút Ghi âm bên dưới một lần — cùng một bản ghi sẽ
+        được gửi đồng thời tới hai đường transcribe của <code>clone-voice-client</code>:
+        chạy Whisper ngay trong tiến trình app này (Local), và gửi qua HTTP tới một
+        clone-voice-station đang chạy (Lazy). Có preview trực tiếp trong lúc ghi (Local
+        cập nhật mỗi 1s, Lazy mỗi 2s); thời gian lưu lại để so sánh là thời gian phản hồi
+        của lần gửi cuối cùng khi bấm Dừng.
+      </p>
+
+      <!-- Single shared record control — one take, sent to both Local and Lazy at once. -->
+      <div class="record-bar">
+        <button class="mic-btn" id="recordBtn" title="Ghi âm — gửi đồng thời cho cả Local và Lazy">🎤 Ghi âm &amp; so sánh</button>
+        <div class="record-panel" id="recordPanel" hidden>
+          <div class="record-timer" id="recordTimer">00:00</div>
+          <div class="record-status" id="recordStatus">Đang ghi âm…</div>
+          <div class="record-actions">
+            <button class="btn danger" id="recordStopBtn">⏹ Dừng &amp; so sánh</button>
+            <button class="btn ghost" id="recordCancelBtn">Huỷ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+
+        <section class="compare-col" id="col-manual">
+          <div class="col-head">
+            <span class="col-title">✍️ Nhập tay</span>
+          </div>
+          <textarea class="compare-text" id="manualText" placeholder="Gõ câu của bạn ở đây…"></textarea>
+        </section>
+
+        <section class="compare-col" id="col-local">
+          <div class="col-head">
+            <span class="col-title">📦 Giọng nói — Local (trong thư viện)</span>
+            <span class="time-badge" id="localTimeBadge"></span>
+          </div>
+          <textarea class="compare-text" id="localText" placeholder="Bấm nút Ghi âm ở trên rồi nói…"></textarea>
+          <div class="diff-line" id="localDiff"></div>
+        </section>
+
+        <section class="compare-col" id="col-remote">
+          <div class="col-head">
+            <span class="col-title">🌐 Giọng nói — Lazy (qua voice-station)</span>
+            <span class="time-badge" id="remoteTimeBadge"></span>
+          </div>
+          <textarea class="compare-text" id="remoteText" placeholder="Bấm nút Ghi âm ở trên rồi nói… (cần clone-voice-station đang chạy)"></textarea>
+          <div class="diff-line" id="remoteDiff"></div>
+        </section>
+
+      </div>
+
+      <!-- Round-by-round timing history, kept in sessionStorage so it survives a
+           reload within the same tab but resets on a fresh session. -->
+      <div class="timing-history" id="timingHistory" hidden>
+        <h3>Lịch sử thời gian (phiên này)</h3>
+        <table>
+          <thead>
+            <tr><th>Lượt</th><th>📦 Local</th><th>🌐 Lazy</th></tr>
+          </thead>
+          <tbody id="timingHistoryBody"></tbody>
+        </table>
+      </div>
+
+      <div id="disclaimer">
+        Lazy mode cần clone-voice-station chạy sẵn và biến môi trường
+        VOICE_STATION_URL / VOICE_STATION_API_KEY trỏ tới nó — nếu không, ô đó sẽ báo lỗi kết nối.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/static/compare.js"></script>
+</body>
+</html>

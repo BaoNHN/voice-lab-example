@@ -63,6 +63,11 @@ async def index(request: Request):
     return templates.TemplateResponse(request, "index.html", {})
 
 
+@app.get("/compare", response_class=HTMLResponse)
+async def compare(request: Request):
+    return templates.TemplateResponse(request, "compare.html", {})
+
+
 @app.post("/get")
 async def get_route(request: Request):
     data   = await request.json()
@@ -73,13 +78,25 @@ async def get_route(request: Request):
 
 
 @app.post("/transcribe")
-async def transcribe_route(audio: UploadFile = File(...), language: str = Form("vi")):
+async def transcribe_route(audio: UploadFile = File(...), language: str = Form("vi"),
+                            mode: str = Form("local")):
+    """mode="local"  — in-process Whisper via clone_voice_client.local_stt (no
+                        network call to clone-voice-station; what index.html uses).
+       mode="remote" — "lazy" path: ships the recording over HTTP to a running
+                        clone-voice-station (VOICE_STATION_URL/VOICE_STATION_API_KEY),
+                        which does the transcription. Used by compare.html to show
+                        both paths side by side."""
     content = await audio.read()
     try:
-        result = voice_client.transcribe_local(
-            audio.filename, content, mime=audio.content_type, language=language,
-            pack=ACTIVE_PACK,
-        )
+        if mode == "remote":
+            result = voice_client.transcribe(
+                audio.filename, content, mime=audio.content_type, language=language,
+            )
+        else:
+            result = voice_client.transcribe_local(
+                audio.filename, content, mime=audio.content_type, language=language,
+                pack=ACTIVE_PACK,
+            )
     except VoiceStationError as e:
         return {"status": "error", "text": e.message}
     return {"status": "success", "text": result["text"]}

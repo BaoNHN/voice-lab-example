@@ -26,11 +26,26 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .header-center {
     font-size: 22px;
     font-weight: 600;
+}
+
+.header-link {
+    position: absolute;
+    right: 20px;
+    color: white;
+    font-size: 13px;
+    text-decoration: none;
+    opacity: .85;
+}
+
+.header-link:hover {
+    opacity: 1;
+    text-decoration: underline;
 }
 
 .container {
@@ -206,13 +221,8 @@ body {
     cursor: not-allowed;
 }
 
-#micButton {
-    background-color: #D63B3B;
-}
-
-#micButton:hover {
-    background-color: #B71C1C;
-}
+/* Mic button uses the same purple as every other button (.input-area button)
+   now, matching the app's theme color — no red override. */
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }

@@ -4,3 +4,4 @@ __pycache__/
 *.pyo
 /data/
 /stt_pack/
+voice_station_key.txt
