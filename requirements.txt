@@ -5,3 +5,6 @@ python-multipart
 scikit-learn
 requests
 -e ../clone-voice-client[local]
+
+# start_ngrok.py -- demo-only public tunnel, temporary stand-in until real deployment
+ngrok>=1.7.0

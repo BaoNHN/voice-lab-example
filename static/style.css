@@ -38,7 +38,7 @@ body {
     position: absolute;
     right: 20px;
     color: white;
-    font-size: 13px;
+    font-size: 15px;
     text-decoration: none;
     opacity: .85;
 }
@@ -72,7 +72,7 @@ body {
 }
 
 .welcome-title {
-    font-size: 26px;
+    font-size: 25px;
     font-weight: 600;
     color: #212121;
     margin: 0 0 8px 0;
@@ -99,7 +99,7 @@ body {
     border-radius: 20px;
     background: white;
     color: #424242;
-    font-size: 13px;
+    font-size: 15px;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
 }
@@ -136,7 +136,7 @@ body {
 /* ── Disclaimer ─────────────────────────────────── */
 #disclaimer {
     text-align: center;
-    font-size: 12px;
+    font-size: 15px;
     color: #9E9E9E;
     padding: 6px 16px 8px;
     background: white;

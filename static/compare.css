@@ -8,7 +8,7 @@
 .compare-intro {
     max-width: 900px;
     margin: 0 auto 20px;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.5;
     color: #616161;
 }
@@ -18,7 +18,7 @@
     color: #6200EA;
     padding: 1px 5px;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 15px;
 }
 
 .compare-grid {
@@ -51,7 +51,7 @@
 }
 
 .col-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #424242;
 }
@@ -64,7 +64,7 @@
     border: 1px solid #E0E0E0;
     border-radius: 8px;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.5;
     background: white;
 }
@@ -100,7 +100,7 @@
 
 .diff-line {
     margin-top: 8px;
-    font-size: 12.5px;
+    font-size: 15px;
     line-height: 1.6;
     color: #757575;
     min-height: 1em;
@@ -116,7 +116,7 @@
 /* ── Time badge — round-trip latency of the last final (Stop-triggered)
    transcribe for this column, the number saved into the timing history. ── */
 .time-badge {
-    font-size: 12px;
+    font-size: 15px;
     font-variant-numeric: tabular-nums;
     color: #6200EA;
     background: #F3E5F5;
@@ -155,7 +155,7 @@
 
 /* The stopwatch, front and center at the top of the panel. */
 .record-timer {
-    font-size: 32px;
+    font-size: 25px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #D63B3B;
@@ -167,7 +167,7 @@
 }
 
 .record-status {
-    font-size: 13px;
+    font-size: 15px;
     color: #616161;
     margin-bottom: 12px;
 }
@@ -184,7 +184,7 @@
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .record-actions .btn.danger {
@@ -223,7 +223,7 @@
 }
 
 .timing-history h3 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #424242;
     margin: 0 0 8px;
@@ -232,7 +232,7 @@
 .timing-history table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 15px;
 }
 
 .timing-history th,
