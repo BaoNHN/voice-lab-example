@@ -156,8 +156,13 @@ async function transcribeChunksSoFar(mode, chunks) {
     formData.append("audio", new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" }), "recording.webm");
     formData.append("language", "vi");
     formData.append("mode", mode);
-    const res  = await fetch("/transcribe", { method: "POST", body: formData });
-    const data = await res.json();
+    const res = await fetch("/transcribe", { method: "POST", body: formData });
+    let data;
+    try {
+        data = await res.json();
+    } catch {
+        throw new Error(`Máy chủ lỗi (${res.status}): không đọc được phản hồi.`);
+    }
     if (data.status !== "success") throw new Error(data.text || "Lỗi nhận dạng giọng nói.");
     return data.text || "";
 }
