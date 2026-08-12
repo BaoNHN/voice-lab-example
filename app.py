@@ -11,6 +11,14 @@ retrieval index instead of the full legal RAG stack.
 
 Setup
 -----
+Requires the `clone-voice-client` repo checked out as a SIBLING directory
+(../clone-voice-client) -- requirements.txt installs it via
+`-e ../clone-voice-client[local]`, not from PyPI; missing that folder makes
+the install below fail outright. Full terminal-command + ngrok walkthrough
+for this whole 4-repo system (clone-voice-station, clone-voice-client,
+rag-legal-assistant, voice-lab-example) is in
+../rag-legal-assistant/HUONG_DAN_CHAY_TOAN_HE_THONG.md.
+
     pip install -r requirements.txt          # pulls in clone-voice-client[local]
                                               # (openai-whisper + torch — heavy,
                                               # first install takes a few minutes)
@@ -20,6 +28,10 @@ Optional: to see hotword-biased local transcription, run clone-voice-station,
 register/login at /stt-lab, create an adapter with some hotwords, download
 its .stt-pack.zip, and drop it into this repo's stt_pack/ folder before
 starting this app.
+
+Optional: to point this app's "remote" comparison mode (/compare) at a
+clone-voice-station running elsewhere (e.g. exposed via ngrok for a demo),
+open /settings and paste its URL -- takes effect immediately, no restart.
 """
 
 import glob
@@ -28,7 +40,7 @@ import os
 from clone_voice_client import VoiceStationClient, VoiceStationError
 from clone_voice_client import local_stt
 from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -41,7 +53,27 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-voice_client = VoiceStationClient()
+# Live-adjustable clone-voice-station URL (added 2026-08-12), same idea as
+# rag-legal-assistant's voice/station_client.py: for a local demo where
+# clone-voice-station is tunnelled through ngrok (a different URL every run),
+# hardcoding VOICE_STATION_URL and restarting is slower than pasting the new
+# URL into /settings. This file, if present, wins over the env var at
+# startup. VoiceStationClient.base_url is a plain mutable attribute read
+# fresh on every call, so updating it at runtime (see /settings/station_url
+# below) takes effect immediately, no restart needed.
+STATION_URL_OVERRIDE_PATH = os.path.join(BASE_DIR, "voice_station_url_override.txt")
+
+
+def _load_station_url_override():
+    if os.path.isfile(STATION_URL_OVERRIDE_PATH):
+        with open(STATION_URL_OVERRIDE_PATH, "r", encoding="utf-8") as f:
+            url = f.read().strip()
+            if url:
+                return url
+    return None
+
+
+voice_client = VoiceStationClient(base_url=_load_station_url_override())
 
 ACTIVE_PACK = None
 _packs = glob.glob(os.path.join(STT_PACK_DIR, "*.zip"))
@@ -66,6 +98,28 @@ async def index(request: Request):
 @app.get("/compare", response_class=HTMLResponse)
 async def compare(request: Request):
     return templates.TemplateResponse(request, "compare.html", {})
+
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    return templates.TemplateResponse(request, "settings.html", {})
+
+
+@app.get("/settings/station_url")
+async def get_station_url_route():
+    return {"url": voice_client.base_url, "available": voice_client.is_available()}
+
+
+@app.post("/settings/station_url")
+async def set_station_url_route(request: Request):
+    data = await request.json()
+    url = (data.get("url") or "").strip().rstrip("/")
+    if not url:
+        return JSONResponse({"status": "error", "message": "URL không được để trống."}, status_code=400)
+    voice_client.base_url = url
+    with open(STATION_URL_OVERRIDE_PATH, "w", encoding="utf-8") as f:
+        f.write(url)
+    return {"url": url, "available": voice_client.is_available()}
 
 
 @app.post("/get")

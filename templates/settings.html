@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Cài đặt – voice-lab-example</title>
+  <style>
+    .settings-main { max-width: 640px; margin: 0 auto; padding: 32px 20px; }
+    .settings-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+    .settings-card h2 { font-size: 15px; margin-bottom: 8px; }
+    .settings-desc { font-size: 12.5px; opacity: .7; margin-bottom: 14px; }
+    .settings-row { display: flex; gap: 10px; align-items: center; }
+    .settings-row input {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: inherit;
+      font-size: 13.5px;
+      font-family: monospace;
+    }
+    .settings-row button {
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #0DB4A2;
+      color: #0B1F3A;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .health-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+    .health-dot.up { background: #4DFFB4; }
+    .health-dot.down { background: #FF8080; }
+    .health-line { font-size: 12.5px; opacity: .75; margin-top: 10px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <main class="chat-container">
+    <div class="header">
+      <div class="header-center">Cài đặt</div>
+      <a class="header-link" href="/">← Về chat demo</a>
+    </div>
+
+    <div class="settings-main">
+      <div class="settings-card">
+        <h2>Kết nối máy chủ giọng nói (clone-voice-station)</h2>
+        <p class="settings-desc">
+          Địa chỉ mà voice-lab-example dùng cho chế độ "remote" ở trang So sánh — dán URL ngrok/cloudflared mới ở đây khi demo cục bộ, không cần khởi động lại server. Chế độ "local" (Whisper chạy ngay trong tiến trình này) không phụ thuộc vào cài đặt này.
+        </p>
+        <div class="settings-row">
+          <input type="text" id="stationUrlInput" placeholder="https://xxxx.ngrok-free.app"/>
+          <button id="saveStationUrlBtn">Lưu</button>
+        </div>
+        <div class="health-line" id="stationHealthLine">Đang kiểm tra…</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+async function loadStationUrl() {
+  const data = await fetch('/settings/station_url').then(r => r.json());
+  document.getElementById('stationUrlInput').value = data.url || '';
+  renderHealth(data.available);
+}
+
+function renderHealth(available) {
+  const el = document.getElementById('stationHealthLine');
+  el.innerHTML = available
+    ? '<span class="health-dot up"></span>Đã kết nối tới clone-voice-station.'
+    : '<span class="health-dot down"></span>Không kết nối được tới clone-voice-station ở địa chỉ này.';
+}
+
+document.getElementById('saveStationUrlBtn').addEventListener('click', async () => {
+  const url = document.getElementById('stationUrlInput').value.trim();
+  const res  = await fetch('/settings/station_url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+  const data = await res.json();
+  if (data.status === 'error') { alert('❌ ' + data.message); return; }
+  renderHealth(data.available);
+});
+
+loadStationUrl();
+</script>
+</body>
+</html>
