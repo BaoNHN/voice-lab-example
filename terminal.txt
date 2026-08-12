@@ -4,6 +4,10 @@ voice-lab-example là app demo độc lập, minh hoạ chạy Whisper (STT loca
 có thể LoRA-adapted) ngay trong tiến trình của app, so sánh với gọi qua
 mạng tới clone-voice-station.
 
+Tài liệu tổng hợp cả 4 project (kiến trúc, cài đặt, ngrok cho từng cái):
+D:\hoc\project\clone-voice-station\HUONG_DAN_CHAY_TOAN_HE_THONG.md
+D:\hoc\project\clone-voice-station\HUONG_DAN_DEMO.html
+
 --------------------------------------------------------------------------
 1. CHẠY SERVICE (đơn giản nhất — chỉ dùng STT local, không cần gì thêm)
 --------------------------------------------------------------------------

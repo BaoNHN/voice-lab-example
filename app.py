@@ -17,7 +17,7 @@ Requires the `clone-voice-client` repo checked out as a SIBLING directory
 the install below fail outright. Full terminal-command + ngrok walkthrough
 for this whole 4-repo system (clone-voice-station, clone-voice-client,
 rag-legal-assistant, voice-lab-example) is in
-../rag-legal-assistant/HUONG_DAN_CHAY_TOAN_HE_THONG.md.
+../clone-voice-station/HUONG_DAN_CHAY_TOAN_HE_THONG.md.
 
     pip install -r requirements.txt          # pulls in clone-voice-client[local]
                                               # (openai-whisper + torch — heavy,
