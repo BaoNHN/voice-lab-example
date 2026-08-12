@@ -153,6 +153,14 @@ async def transcribe_route(audio: UploadFile = File(...), language: str = Form("
             )
     except VoiceStationError as e:
         return {"status": "error", "text": e.message}
+    except Exception as e:
+        # Any other failure (e.g. ffmpeg/decoding crashes inside
+        # clone_voice_client.local_stt) must still come back as JSON --
+        # letting it propagate hits Starlette's default handler, which
+        # returns a *plain-text* 500 body that the frontend's res.json()
+        # can't parse ("Unexpected token 'I', "Internal S"... is not valid
+        # JSON"), hiding the real error behind a JS parse error instead.
+        return JSONResponse({"status": "error", "text": str(e)}, status_code=500)
     return {"status": "success", "text": result["text"]}
 
 

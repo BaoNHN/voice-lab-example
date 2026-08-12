@@ -43,6 +43,21 @@ body {
     opacity: .85;
 }
 
+/* index.html has two header-links side by side (compare + settings) --
+   position them as a group instead of both landing on the same
+   right:20px spot. */
+.header-links {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-links .header-link {
+    position: static;
+}
+
 .header-link:hover {
     opacity: 1;
     text-decoration: underline;

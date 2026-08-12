@@ -121,8 +121,16 @@ async function transcribeChunksSoFar(chunks) {
     const formData = new FormData();
     formData.append("audio", new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" }), "recording.webm");
     formData.append("language", "vi");
-    const res  = await fetch("/transcribe", { method: "POST", body: formData });
-    const data = await res.json();
+    const res = await fetch("/transcribe", { method: "POST", body: formData });
+    let data;
+    try {
+        data = await res.json();
+    } catch {
+        // Server errored before it could produce JSON (e.g. an unhandled
+        // exception hitting the framework's default plain-text 500 page) --
+        // surface a readable message instead of the raw JSON-parse error.
+        throw new Error(`Máy chủ lỗi (${res.status}): không đọc được phản hồi.`);
+    }
     if (data.status !== "success") throw new Error(data.text || "Lỗi nhận dạng giọng nói.");
     return data.text || "";
 }
