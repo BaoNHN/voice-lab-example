@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Huong Dan Demo - voice-lab-example</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f6f7f9; --text: #1c1f26; --text-dim: #5b6270;
+    --border: #e2e5ea; --accent: #2e5aac; --accent-soft: #eaf0fb;
+    --code-bg: #1c1f26; --code-text: #e8eaf0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --bg-alt: #1b1e24; --text: #e7e9ee; --text-dim: #9aa1ae;
+      --border: #2b2f38; --accent: #7fa6f5; --accent-soft: #1e2a42;
+      --code-bg: #0d0f13; --code-text: #e8eaf0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; }
+  .layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static !important; border-right: none !important; border-bottom: 1px solid var(--border); }
+  }
+  nav.toc { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    padding: 28px 18px; border-right: 1px solid var(--border); background: var(--bg-alt); }
+  nav.toc .toclabel { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ul { list-style: none; margin: 0; padding-left: 14px; }
+  nav.toc > ul { padding-left: 0; }
+  nav.toc li { margin: 1px 0; }
+  nav.toc a { display: block; padding: 6px 10px; border-radius: 6px; color: var(--text);
+    text-decoration: none; font-size: 13.5px; }
+  nav.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+  main { padding: 40px 44px 100px; min-width: 0; }
+  main > .subtitle { color: var(--text-dim); margin: -4px 0 32px; font-size: 15px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-top: 8px; border-top: 1px solid var(--border); }
+  main > h2:first-of-type { border-top: none; margin-top: 0; }
+  h3 { font-size: 16.5px; margin: 26px 0 8px; }
+  h4 { font-size: 14.5px; margin: 18px 0 6px; color: var(--text-dim); }
+  p { margin: 10px 0; }
+  a { color: var(--accent); }
+  code { background: var(--bg-alt); border: 1px solid var(--border); padding: 1px 6px;
+    border-radius: 4px; font-size: 13px; font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+  pre { background: var(--code-bg); color: var(--code-text); padding: 14px 16px; border-radius: 8px;
+    overflow-x: auto; font-size: 13px; line-height: 1.55;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 13.5px; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-alt); }
+  blockquote { margin: 14px 0; padding: 10px 16px; border-left: 3px solid var(--accent);
+    background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 4px 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+  footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc">
+    <p class="toclabel">Muc luc</p>
+    <div class="toc">
+<ul>
+<li><a href="#huong-dan-demo-voice-lab-example">Hướng Dẫn Demo — voice-lab-example</a><ul>
+<li><a href="#muc-luc">Mục Lục</a></li>
+<li><a href="#1-yeu-cau-cai-at">1. Yêu Cầu &amp; Cài Đặt</a></li>
+<li><a href="#2-khoi-ong">2. Khởi Động</a></li>
+<li><a href="#3-trang-chat">3. Trang Chat (/)</a></li>
+<li><a href="#4-trang-so-sanh-compare">4. Trang So Sánh (/compare)</a></li>
+<li><a href="#5-bat-che-o-lazy-can-clone-voice-station">5. Bật Chế Độ Lazy — Cần clone-voice-station</a></li>
+<li><a href="#6-stt-lab-hotwordlora-tuy-chon">6. STT Lab — Hotword/LoRA (tuỳ chọn)</a></li>
+<li><a href="#7-kien-truc-ky-thuat">7. Kiến Trúc Kỹ Thuật</a></li>
+<li><a href="#8-xu-ly-su-co">8. Xử Lý Sự Cố</a><ul>
+<li><a href="#transcribe-bao-loi-500-log-co-filenotfounderror-tu-subprocess">/transcribe báo lỗi 500, log có FileNotFoundError từ subprocess</a></li>
+<li><a href="#cot-lazy-bao-khong-ket-noi-uoc-toi-voice-station">Cột Lazy báo "Không kết nối được tới voice station"</a></li>
+<li><a href="#cot-lazy-phan-hoi-rat-cham-nhieu-giay-du-mang-local">Cột Lazy phản hồi rất chậm (nhiều giây) dù mạng local</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+  </nav>
+  <main>
+    <h1 id="huong-dan-demo-voice-lab-example">Hướng Dẫn Demo — voice-lab-example</h1>
+<blockquote>
+<p>Ứng dụng demo nhỏ cho <code>clone-voice-client</code>: (1) chat hỏi-đáp tiếng Việt (retrieval TF-IDF thật, không phải câu trả lời cứng) với input bằng giọng nói chạy Whisper <strong>local</strong> (trong tiến trình app, không gọi mạng); (2) trang <code>/compare</code> để so sánh nhập tay với nhập giọng nói qua hai đường transcribe khác nhau của <code>clone-voice-client</code> — <strong>Local</strong> (trong thư viện) và <strong>Lazy</strong> (qua <code>clone-voice-station</code>) — kèm đo thời gian phản hồi từng bên.</p>
+</blockquote>
+<hr />
+<h2 id="muc-luc">Mục Lục</h2>
+<ol>
+<li><a href="#1-yêu-cầu--cài-đặt">Yêu Cầu &amp; Cài Đặt</a></li>
+<li><a href="#2-khởi-động">Khởi Động</a></li>
+<li><a href="#3-trang-chat-">Trang Chat (<code>/</code>)</a></li>
+<li><a href="#4-trang-so-sánh-compare">Trang So Sánh (<code>/compare</code>)</a></li>
+<li><a href="#5-bật-chế-độ-lazy--cần-clone-voice-station">Bật Chế Độ Lazy — Cần <code>clone-voice-station</code></a></li>
+<li><a href="#6-stt-lab--hotwordlora-tuỳ-chọn">STT Lab — Hotword/LoRA (tuỳ chọn)</a></li>
+<li><a href="#7-kiến-trúc-kỹ-thuật">Kiến Trúc Kỹ Thuật</a></li>
+<li><a href="#8-xử-lý-sự-cố">Xử Lý Sự Cố</a></li>
+</ol>
+<hr />
+<h2 id="1-yeu-cau-cai-at">1. Yêu Cầu &amp; Cài Đặt</h2>
+<pre><code class="language-bash">pip install -r requirements.txt   # kéo theo clone-voice-client[local] (openai-whisper + torch —
+                                   # nặng, lần cài đầu mất vài phút)
+</code></pre>
+<p>Cần <strong>ffmpeg</strong> trong PATH (Whisper dùng để giải mã webm/ogg/m4a/mp3 từ trình duyệt). Nếu ffmpeg hệ thống không chạy được (hay gặp trên Windows với bản conda-forge), trỏ vào một bản ffmpeg tĩnh khác qua biến môi trường:</p>
+<pre><code class="language-bash">set CLONE_VOICE_FFMPEG_DIR=D:\hoc\project\clone-voice-station\bin   # Windows cmd
+$env:CLONE_VOICE_FFMPEG_DIR = &quot;D:\hoc\project\clone-voice-station\bin&quot;   # PowerShell
+</code></pre>
+<h2 id="2-khoi-ong">2. Khởi Động</h2>
+<pre><code class="language-bash">python app.py
+</code></pre>
+<p>Chạy trên <strong>http://127.0.0.1:8091</strong>. Lần đầu khởi động sẽ tải bộ dữ liệu hội thoại tiếng Việt (<code>MrCookieDev/Vietnamese-Chatting-Dataset</code>, ~2k dòng) về <code>data/</code> và dựng chỉ mục TF-IDF trong bộ nhớ — vài giây, không cần cấu hình gì thêm.</p>
+<h2 id="3-trang-chat">3. Trang Chat (<code>/</code>)</h2>
+<p>Demo gốc: gõ câu hỏi hoặc bấm 🎤 để nói, Whisper chạy <strong>local</strong> (trong tiến trình app này, <code>transcribe_local()</code> của <code>clone-voice-client</code> — không gọi mạng), điền kết quả vào ô nhập (không tự gửi, để bạn xem/sửa trước). Câu trả lời lấy từ retrieval TF-IDF trên bộ dữ liệu hội thoại, không phải LLM hay câu trả lời cứng.</p>
+<h2 id="4-trang-so-sanh-compare">4. Trang So Sánh (<code>/compare</code>)</h2>
+<p>Bấm <strong>"🧪 So sánh nhập tay vs giọng nói →"</strong> ở góc phải header của trang chat, hoặc vào thẳng <code>/compare</code>. Có 3 ô:</p>
+<ul>
+<li><strong>✍️ Nhập tay</strong> — gõ tay bình thường, dùng làm câu tham chiếu để so sánh.</li>
+<li><strong>📦 Giọng nói — Local</strong> — transcribe qua <code>transcribe_local()</code>, trong tiến trình app này.</li>
+<li><strong>🌐 Giọng nói — Lazy</strong> — transcribe qua <code>VoiceStationClient.transcribe()</code>, gửi HTTP tới một <code>clone-voice-station</code> đang chạy.</li>
+</ul>
+<p>Chỉ có <strong>một nút "🎤 Ghi âm &amp; so sánh"</strong> duy nhất — bấm, nói một câu, bấm Dừng. Bản ghi được gửi <strong>đồng thời</strong> (song song) cho cả hai đường transcribe, mỗi bên đo thời gian phản hồi riêng bằng <code>performance.now()</code>.</p>
+<ul>
+<li><strong>Trong lúc ghi</strong>: cả hai ô có preview trực tiếp, cập nhật liên tục — Local mỗi 1 giây, Lazy mỗi 2 giây (Lazy chậm hơn vì phải qua mạng + suy luận phía server). Preview dùng "sliding window" (giới hạn ~7 giây audio gần nhất mỗi lần gửi) để chi phí không tăng dần theo thời gian ghi.</li>
+<li><strong>Khi bấm Dừng</strong>: gửi lại <strong>toàn bộ</strong> bản ghi (không giới hạn cửa sổ) cho cả hai bên — đây là kết quả <strong>chính thức</strong>, luôn ghi đè lên bản preview.</li>
+<li><strong>Badge thời gian</strong> (VD "2.3s") hiện cạnh tiêu đề mỗi cột sau khi có kết quả; bên nào lỗi hiện "❌ lỗi" (di chuột xem chi tiết) thay vì làm gián đoạn bên còn lại.</li>
+<li><strong>Dòng so sánh</strong> dưới mỗi ô giọng nói tô sáng những từ khác với ô nhập tay (diff theo từ, dùng LCS).</li>
+<li><strong>Lịch sử thời gian</strong>: mỗi lượt hoàn tất được lưu vào <code>sessionStorage</code> của trình duyệt (mất khi đóng tab/trình duyệt) và hiện thành bảng bên dưới — để so sánh nhiều lượt liền nhau.</li>
+</ul>
+<h2 id="5-bat-che-o-lazy-can-clone-voice-station">5. Bật Chế Độ Lazy — Cần <code>clone-voice-station</code></h2>
+<p>Cột Lazy cần một <code>clone-voice-station</code> đang chạy và một API key hợp lệ:</p>
+<pre><code class="language-bash"># 1. Chạy clone-voice-station (repo riêng, xem HUONG_DAN_DEMO.md của nó)
+cd ../clone-voice-station
+python app.py     # http://127.0.0.1:8090
+
+# 2. Đăng ký một client mới cho voice-lab-example và lấy API key
+python -c &quot;
+from database.database import init_db, create_client
+init_db()
+print(create_client('voice-lab-example')['api_key'])
+&quot;
+</code></pre>
+<p>Lưu key vào <code>voice_station_key.txt</code> (đã gitignore) rồi chạy voice-lab-example với 2 biến môi trường:</p>
+<pre><code class="language-bash"># PowerShell
+$env:VOICE_STATION_API_KEY = Get-Content voice_station_key.txt
+$env:CLONE_VOICE_FFMPEG_DIR = &quot;D:\hoc\project\clone-voice-station\bin&quot;
+python app.py
+</code></pre>
+<p><code>VOICE_STATION_URL</code> mặc định là <code>http://127.0.0.1:8090</code>, chỉ cần đặt nếu station chạy chỗ khác. Nếu chưa cấu hình, cột Lazy sẽ báo lỗi kết nối rõ ràng thay vì treo.</p>
+<h2 id="6-stt-lab-hotwordlora-tuy-chon">6. STT Lab — Hotword/LoRA (tuỳ chọn)</h2>
+<p>Để xem transcribe <strong>local</strong> có thiên hướng từ khoá riêng (hotword bias) thay vì Whisper mặc định: chạy <code>clone-voice-station</code>, đăng ký/đăng nhập tại <code>/stt-lab</code>, tạo adapter kèm hotword, tải file <code>.stt-pack.zip</code>, bỏ vào thư mục <code>stt_pack/</code> của repo này trước khi khởi động <code>app.py</code> — log khởi động sẽ báo pack đã nạp (<code>[voice-lab-example] Loaded STT Lab pack: ...</code>).</p>
+<h2 id="7-kien-truc-ky-thuat">7. Kiến Trúc Kỹ Thuật</h2>
+<pre><code>voice-lab-example/
+├── app.py                     # FastAPI: &quot;/&quot; (chat), &quot;/compare&quot;, &quot;/get&quot;, &quot;/transcribe&quot;
+├── engine/
+│   └── retrieval_engine.py    # TF-IDF trên Vietnamese-Chatting-Dataset (tải tự động vào data/)
+├── templates/
+│   ├── index.html             # Trang chat
+│   └── compare.html           # Trang so sánh
+├── static/
+│   ├── style.css / script.js  # Trang chat
+│   └── compare.css / compare.js  # Trang so sánh (single record button, sliding-window
+│                                  #   live-tick, stale-response seq guard, timing history)
+├── data/                      # Dataset tải về (gitignore)
+└── stt_pack/                  # .stt-pack.zip tuỳ chọn từ STT Lab (gitignore)
+</code></pre>
+<p><code>/transcribe</code> nhận <code>mode=local</code> (mặc định, <code>transcribe_local()</code>) hoặc <code>mode=remote</code> (<code>transcribe()</code>, đi qua <code>clone-voice-station</code>) — cùng một route phục vụ cả hai trang.</p>
+<h2 id="8-xu-ly-su-co">8. Xử Lý Sự Cố</h2>
+<h3 id="transcribe-bao-loi-500-log-co-filenotfounderror-tu-subprocess"><code>/transcribe</code> báo lỗi 500, log có <code>FileNotFoundError</code> từ subprocess</h3>
+<p><strong>Nguyên nhân:</strong> thiếu <code>ffmpeg</code> trên PATH của tiến trình Python đang chạy <code>app.py</code>. <strong>Khắc phục:</strong> đặt <code>CLONE_VOICE_FFMPEG_DIR</code> trước khi chạy (mục 1), hoặc cài ffmpeg vào PATH hệ thống.</p>
+<h3 id="cot-lazy-bao-khong-ket-noi-uoc-toi-voice-station">Cột Lazy báo "Không kết nối được tới voice station"</h3>
+<p><strong>Kiểm tra:</strong> <code>clone-voice-station</code> có đang chạy không (<code>curl http://127.0.0.1:8090/api/health</code>), <code>VOICE_STATION_API_KEY</code> đã đặt đúng key của client <code>voice-lab-example</code> chưa (mục 5).</p>
+<h3 id="cot-lazy-phan-hoi-rat-cham-nhieu-giay-du-mang-local">Cột Lazy phản hồi rất chậm (nhiều giây) dù mạng local</h3>
+<p><strong>Nguyên nhân có thể:</strong> <code>clone-voice-station</code> đang cấu hình <code>rvc_endpoint</code> (mục Colab) trỏ vào một địa chỉ không phản hồi được — mỗi request <code>/api/transcribe</code> phải đợi hết timeout (mặc định 20s) rồi mới fallback về Whisper local phía station. <strong>Kiểm tra:</strong></p>
+<pre><code class="language-bash">cd ../clone-voice-station
+python -c &quot;from database.database import get_setting; print(repr(get_setting('rvc_endpoint')))&quot;
+</code></pre>
+<p>Nếu không có Colab session nào đang chạy thật, xoá về rỗng:</p>
+<pre><code class="language-bash">python -c &quot;from database.database import set_setting; set_setting('rvc_endpoint', '')&quot;
+</code></pre>
+    <footer>Chuyen doi tu HUONG_DAN_DEMO.md &mdash; xem file goc de biet lich su chinh sua.</footer>
+  </main>
+</div>
+</body>
+</html>

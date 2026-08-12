@@ -1,0 +1,64 @@
+CÁCH CHẠY voice-lab-example + NGROK
+==========================================================================
+voice-lab-example là app demo độc lập, minh hoạ chạy Whisper (STT local,
+có thể LoRA-adapted) ngay trong tiến trình của app, so sánh với gọi qua
+mạng tới clone-voice-station.
+
+--------------------------------------------------------------------------
+1. CHẠY SERVICE (đơn giản nhất — chỉ dùng STT local, không cần gì thêm)
+--------------------------------------------------------------------------
+    cd /d D:\hoc\project\voice-lab-example
+    python app.py
+
+Mặc định port 8091.
+
+⚠️ LƯU Ý: port 8091 TRÙNG với port mặc định của "Local RVC Worker" bên
+clone-voice-station\local_rvc. Đây là 2 service không liên quan nhau —
+không chạy đồng thời cả hai trong cùng một buổi demo (sẽ bị lỗi bind
+port). Nếu cần chạy cùng lúc, đổi port 1 trong 2 bằng biến môi trường
+tương ứng (voice-lab-example: sửa app.py; local_rvc: LOCAL_RVC_PORT).
+
+Lần đầu chạy sẽ tự tải dataset MrCookieDev/Vietnamese-Chatting-Dataset
+(~2k dòng) vào data/ và build index TF-IDF trong RAM — không cần LLM
+hay Groq key (retrieval là TF-IDF local, không gọi LLM ngoài).
+
+--------------------------------------------------------------------------
+2. BẬT SO SÁNH VỚI clone-voice-station (tuỳ chọn, trang /compare)
+--------------------------------------------------------------------------
+Cần clone-voice-station đang chạy (xem terminal.txt bên đó) + 1 API key
+riêng cho voice-lab-example:
+
+    cd /d D:\hoc\project\clone-voice-station
+    python -c "
+    from database.database import init_db, create_client
+    init_db()
+    print(create_client('voice-lab-example')['api_key'])
+    "
+
+-> lưu key in ra vào D:\hoc\project\voice-lab-example\voice_station_key.txt
+
+Rồi chạy app với các biến môi trường sau (PowerShell):
+
+    $env:VOICE_STATION_API_KEY = Get-Content voice_station_key.txt
+    $env:CLONE_VOICE_FFMPEG_DIR = "D:\hoc\project\clone-voice-station\bin"
+    python app.py
+
+- VOICE_STATION_URL (tuỳ chọn) mặc định http://127.0.0.1:8090, chỉ cần
+  set nếu clone-voice-station chạy ở nơi khác (VD qua ngrok).
+- CLONE_VOICE_FFMPEG_DIR trỏ vào ffmpeg tĩnh của clone-voice-station vì
+  ffmpeg hệ thống trên máy này (conda-forge) bị lỗi decode audio.
+
+--------------------------------------------------------------------------
+3. CHẠY NGROK (demo công khai qua internet, tuỳ chọn)
+--------------------------------------------------------------------------
+Expose voice-lab-example (port 8091) ra internet:
+
+    set NGROK_AUTHTOKEN=your_token_o_day
+    python start_ngrok.py
+
+Lấy token tại https://dashboard.ngrok.com/tunnels/authtokens. URL free
+đổi mỗi lần chạy lại.
+
+CẢNH BÁO: authtoken cũ từng bị hardcode trong start_ngrok.py và đã lọt
+vào lịch sử git (đã push lên GitHub) — phải revoke/rotate token đó tại
+https://dashboard.ngrok.com/tunnels/authtokens.
