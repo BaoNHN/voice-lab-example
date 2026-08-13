@@ -95,11 +95,23 @@ def _load_station_url_override():
 # request. The env var still wins if both are absent/empty is fine too --
 # VoiceStationClient itself falls back to VOICE_STATION_API_KEY when
 # api_key=None is passed through.
+# upload_timeout governs /transcribe's remote-mode call (see VoiceStationClient.
+# transcribe()) -- the SDK's bare 30s default was cutting off /compare's Lazy
+# side for real: a Colab failure (e.g. a 530 from a dead tunnel) falls back to
+# clone-voice-station's own local PhoWhisper-small, and that fallback's
+# inference time scales with recording length, not just cold-load time -- a
+# longer /compare recording plus the Colab round-trip on top of it can exceed
+# 30s even once PhoWhisper-small is warm. Same class of bug already fixed in
+# rag-legal-assistant's voice/station_client.py (speak_timeout there); this is
+# the STT-transcribe equivalent, not the RVC-speak one.
 _KEY_PATH = os.path.join(BASE_DIR, "voice_station_key.txt")
+_upload_timeout = int(os.getenv("VOICE_STATION_UPLOAD_TIMEOUT", "120"))
 if os.path.isfile(_KEY_PATH):
-    voice_client = VoiceStationClient.from_key_file(_KEY_PATH, base_url=_load_station_url_override())
+    voice_client = VoiceStationClient.from_key_file(
+        _KEY_PATH, base_url=_load_station_url_override(), upload_timeout=_upload_timeout,
+    )
 else:
-    voice_client = VoiceStationClient(base_url=_load_station_url_override())
+    voice_client = VoiceStationClient(base_url=_load_station_url_override(), upload_timeout=_upload_timeout)
 
 # ── Local STT packs (ported from rag-legal-assistant's voice/station_client.py) ─
 # Multiple .stt-pack.zip files can be uploaded via /settings; at most one is
