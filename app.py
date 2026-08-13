@@ -54,7 +54,7 @@ if os.path.isfile(os.path.join(_SIBLING_FFMPEG_DIR, "ffmpeg.exe")):
 
 from clone_voice_client import VoiceStationClient, VoiceStationError
 from clone_voice_client import local_stt
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -128,7 +128,10 @@ def _write_stt_packs_index(index: dict):
 
 
 def list_stt_local_packs() -> dict:
-    return _read_stt_packs_index()
+    index = _read_stt_packs_index()
+    for p in index["packs"]:
+        p["is_warm"] = p["id"] in _loaded_pack_cache
+    return index
 
 
 def upload_stt_local_pack(filename: str, content: bytes) -> dict:
@@ -258,7 +261,7 @@ async def list_stt_local_packs_route():
 
 
 @app.post("/settings/stt_local_packs")
-async def upload_stt_local_pack_route(pack: UploadFile = File(...)):
+async def upload_stt_local_pack_route(pack: UploadFile = File(...), background_tasks: BackgroundTasks = None):
     """Uploads a .stt-pack.zip downloaded from clone-voice-station's STT Lab
     (/stt-lab, "Tải xuống" on a finished adapter) so this app can run it as a
     local Whisper model."""
@@ -267,15 +270,25 @@ async def upload_stt_local_pack_route(pack: UploadFile = File(...)):
         entry = upload_stt_local_pack(pack.filename, content)
     except ValueError as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+    # The first pack ever uploaded becomes active automatically (see
+    # upload_stt_local_pack) -- pre-warm it too in that case, same as an
+    # explicit activate below.
+    if _read_stt_packs_index().get("active_id") == entry["id"]:
+        background_tasks.add_task(_get_active_pack_loaded)
     return {"status": "ok", "pack": entry}
 
 
 @app.post("/settings/stt_local_packs/{pack_id}/activate")
-async def activate_stt_local_pack_route(pack_id: str):
+async def activate_stt_local_pack_route(pack_id: str, background_tasks: BackgroundTasks):
     try:
         set_active_stt_local_pack(pack_id)
     except ValueError as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+    # Pre-warm in the background so the FIRST recording after switching packs
+    # isn't the one paying for zip-extraction + (Tier 2) loading the base
+    # Whisper model + LoRA adapter into memory -- without this, whichever
+    # /transcribe call happened to land first ate that cost instead.
+    background_tasks.add_task(_get_active_pack_loaded)
     return {"status": "ok"}
 
 
