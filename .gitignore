@@ -5,3 +5,5 @@ __pycache__/
 /data/
 /stt_pack/
 voice_station_key.txt
+voice_station_url_override.txt
+*.log

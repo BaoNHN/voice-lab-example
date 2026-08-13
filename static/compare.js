@@ -336,15 +336,21 @@ recordStopBtn.addEventListener("click", async () => {
 
     // Fired in parallel (not sequentially) so each side's timing reflects its
     // own latency, not however long the other one happened to take first.
-    const [localResult, remoteResult] = await Promise.all([
-        timedTranscribe("local", audioChunks),   // full recording, not windowed
-        timedTranscribe("remote", audioChunks),
-    ]);
-
-    if (localResult.ok)  applyTranscript("local", seqLocal, localResult.text);
-    if (remoteResult.ok) applyTranscript("remote", seqRemote, remoteResult.text);
-    renderTimeBadge("local", localResult);
-    renderTimeBadge("remote", remoteResult);
+    // Each side's textarea/badge updates as soon as ITS OWN result lands --
+    // previously both were held back behind a single Promise.all, so a slow
+    // remote call (e.g. Colab down, falling back to local inference under
+    // GPU contention) kept even an already-finished local result invisible.
+    const localPromise = timedTranscribe("local", audioChunks).then(result => {  // full recording, not windowed
+        if (result.ok) applyTranscript("local", seqLocal, result.text);
+        renderTimeBadge("local", result);
+        return result;
+    });
+    const remotePromise = timedTranscribe("remote", audioChunks).then(result => {
+        if (result.ok) applyTranscript("remote", seqRemote, result.text);
+        renderTimeBadge("remote", result);
+        return result;
+    });
+    const [localResult, remoteResult] = await Promise.all([localPromise, remotePromise]);
     saveRound(localResult, remoteResult);
 
     recordCancelBtn.disabled = false;
