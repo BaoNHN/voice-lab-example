@@ -16,12 +16,6 @@ D:\hoc\project\clone-voice-station\HUONG_DAN_DEMO.html
 
 Mặc định port 8091.
 
-⚠️ LƯU Ý: port 8091 TRÙNG với port mặc định của "Local RVC Worker" bên
-clone-voice-station\local_rvc. Đây là 2 service không liên quan nhau —
-không chạy đồng thời cả hai trong cùng một buổi demo (sẽ bị lỗi bind
-port). Nếu cần chạy cùng lúc, đổi port 1 trong 2 bằng biến môi trường
-tương ứng (voice-lab-example: sửa app.py; local_rvc: LOCAL_RVC_PORT).
-
 Lần đầu chạy sẽ tự tải dataset MrCookieDev/Vietnamese-Chatting-Dataset
 (~2k dòng) vào data/ và build index TF-IDF trong RAM — không cần LLM
 hay Groq key (retrieval là TF-IDF local, không gọi LLM ngoài).
