@@ -222,8 +222,10 @@ function stopLiveTranscribe(mode) {
 // ── Timing history — every completed round this session, kept in
 // sessionStorage so it survives a reload within the same tab. ─────────────
 const HISTORY_KEY = "voiceLabCompareTimingHistory";
+const HISTORY_MAX = 20; // keeps the table from growing unbounded across a long test session
 const timingHistoryBox  = document.getElementById("timingHistory");
 const timingHistoryBody = document.getElementById("timingHistoryBody");
+const clearHistoryBtn   = document.getElementById("clearHistoryBtn");
 
 function loadHistory() {
     try {
@@ -263,9 +265,19 @@ function renderHistory(history) {
 function saveRound(localResult, remoteResult) {
     const history = loadHistory();
     history.push({ at: Date.now(), local: localResult, remote: remoteResult });
+    // Drop the oldest rounds past HISTORY_MAX instead of letting this grow
+    // unbounded for the rest of the tab's session -- confirmed for real: a
+    // long debugging session piles up dozens of rounds with nothing trimming
+    // them, since sessionStorage only clears on tab close, not per-round.
+    while (history.length > HISTORY_MAX) history.shift();
     sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     renderHistory(history);
 }
+
+clearHistoryBtn.addEventListener("click", () => {
+    sessionStorage.removeItem(HISTORY_KEY);
+    renderHistory([]);
+});
 
 renderHistory(loadHistory());
 
