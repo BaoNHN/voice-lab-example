@@ -1,26 +1,23 @@
 #!/usr/bin/env python
 """
 tools/test_medical_lora_wer.py
-Proves the STT Lab Tier 2 (LoRA fine-tune) capability actually works: transcribes the same
-held-out medical-consultation audio through base Whisper and through a LoRA-fine-tuned adapter
-(clone_voice_client.local_stt.transcribe() vs .transcribe_with_lora()), and compares Word Error
-Rate against the reference transcript for both -- if the adapter was trained on domain data (see
-clone-voice-station/tools/import_hf_stt_dataset.py, which produces both the adapter pack and this
-script's held-out eval set from HieuNguyen203/Vietnamese_Medical_Consultation on HuggingFace), its
-WER on held-out medical audio should measurably beat the untrained base model.
+Proves the STT Lab Tier 2 (LoRA fine-tune) capability actually works:
+transcribes the same held-out medical-consultation audio through base
+Whisper and through a LoRA-fine-tuned adapter, and compares Word Error Rate
+against the reference transcript for both -- an adapter trained on domain
+data should measurably beat the untrained base model.
 
-WER math (word-level Levenshtein against lowercased, punctuation-stripped tokens) is the same
-definition clone-voice-station/tools/eval_stt_wer.py uses -- duplicated here (not imported)
-since this is a separate repo with no dependency on clone-voice-station's source tree, same as
-every other cross-repo boundary in this demo (only the .stt-pack.zip file crosses it).
+WER math (word-level Levenshtein against lowercased, punctuation-stripped
+tokens) matches clone-voice-station/tools/eval_stt_wer.py's definition,
+duplicated here since this repo has no dependency on that source tree.
 
 Setup
 -----
 1. In clone-voice-station: python tools/import_hf_stt_dataset.py --train --download-pack medical.stt-pack.zip
-   (uploads real medical-consultation samples, trains a Whisper LoRA adapter locally, and writes
-   a held-out eval set to tools/medical_eval_set/).
-2. Copy medical.stt-pack.zip into this repo's stt_pack/ (or pass --pack directly), and point
-   this script at the eval set the import script produced:
+   (trains a Whisper LoRA adapter locally and writes a held-out eval set to
+   tools/medical_eval_set/).
+2. Copy medical.stt-pack.zip into this repo's stt_pack/ (or pass --pack
+   directly), and point this script at the produced eval set:
 
     python tools/test_medical_lora_wer.py ../clone-voice-station/tools/medical_eval_set
 
@@ -28,8 +25,8 @@ Usage
 -----
     python tools/test_medical_lora_wer.py <eval_dir> [--pack PATH] [--language vi] [--out results.csv]
 
-<eval_dir> is a directory of (NNN.wav, NNN.txt) sidecar pairs, same convention as
-clone-voice-station/tools/eval_stt_wer.py's testset_dir.
+<eval_dir> is a directory of (NNN.wav, NNN.txt) sidecar pairs, same
+convention as eval_stt_wer.py's testset_dir.
 """
 import argparse
 import csv

@@ -5,34 +5,28 @@ Proves the "run in app library, not lazy run" loop end-to-end: a mic
 recording is transcribed by Whisper running IN THIS PROCESS (via
 clone-voice-client's `local` extra), never calling clone-voice-station over
 the network — as opposed to the remote mode (VoiceStationClient.transcribe(),
-HTTP to a running voice-station). The chat itself is a trimmed clone of
-rag-legal-assistant-master's /get contract, backed by a real (if tiny)
-retrieval index instead of the full legal RAG stack.
+HTTP to a running voice-station). The chat is a trimmed clone of
+rag-legal-assistant's /get contract, backed by a real (if tiny) retrieval
+index instead of the full legal RAG stack.
 
 Setup
 -----
 Requires the `clone-voice-client` repo checked out as a SIBLING directory
 (../clone-voice-client) -- requirements.txt installs it via
-`-e ../clone-voice-client[local]`, not from PyPI; missing that folder makes
-the install below fail outright. Full terminal-command + ngrok walkthrough
-for this whole 4-repo system (clone-voice-station, clone-voice-client,
-rag-legal-assistant, voice-lab-example) is in
-../clone-voice-station/HUONG_DAN_CHAY_TOAN_HE_THONG.md.
+`-e ../clone-voice-client[local]`, not from PyPI. Full walkthrough for this
+4-repo system is in ../clone-voice-station/HUONG_DAN_CHAY_TOAN_HE_THONG.md.
 
     pip install -r requirements.txt          # pulls in clone-voice-client[local]
-                                              # (openai-whisper + torch — heavy,
-                                              # first install takes a few minutes)
     python app.py                            # http://127.0.0.1:8091
 
 Optional: to see hotword-biased (or Tier 2 LoRA) local transcription, run
 clone-voice-station, register/login at /stt-lab, create an adapter, download
 its .stt-pack.zip, then upload it at /settings ("Local Whisper pack") --
-takes effect on the next /transcribe call, no restart needed. Multiple packs
-can be uploaded; at most one is active at a time.
+takes effect on the next /transcribe call.
 
 Optional: to point this app's "remote" comparison mode (/compare) at a
-clone-voice-station running elsewhere (e.g. exposed via ngrok for a demo),
-open /settings and paste its URL -- takes effect immediately, no restart.
+clone-voice-station running elsewhere (e.g. via ngrok), open /settings and
+paste its URL -- takes effect immediately, no restart.
 """
 
 import json
@@ -41,13 +35,10 @@ import shutil
 import uuid
 
 # ffmpeg auto-detect -- must happen before clone_voice_client.local_stt is
-# imported, since that module reads CLONE_VOICE_FFMPEG_DIR at its own import
-# time. Same fix rag-legal-assistant's voice/station_client.py applies for
-# the same reason: the system/conda-forge ffmpeg on this machine crashes
-# decoding browser mic audio (STATUS_STACK_BUFFER_OVERRUN), but
-# clone-voice-station ships a known-good static ffmpeg.exe at bin/ -- reuse
-# that instead of requiring every dev session to set the env var by hand. A
-# no-op if the sibling repo isn't checked out at this relative path.
+# imported, since that module reads CLONE_VOICE_FFMPEG_DIR at import time.
+# Reuses clone-voice-station's known-good static ffmpeg.exe at bin/ instead
+# of requiring every dev session to set the env var by hand. A no-op if the
+# sibling repo isn't checked out at this relative path.
 _SIBLING_FFMPEG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "clone-voice-station", "bin")
 if os.path.isfile(os.path.join(_SIBLING_FFMPEG_DIR, "ffmpeg.exe")):
     os.environ.setdefault("CLONE_VOICE_FFMPEG_DIR", os.path.abspath(_SIBLING_FFMPEG_DIR))
@@ -67,14 +58,12 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-# Live-adjustable clone-voice-station URL (added 2026-08-12), same idea as
-# rag-legal-assistant's voice/station_client.py: for a local demo where
-# clone-voice-station is tunnelled through ngrok (a different URL every run),
-# hardcoding VOICE_STATION_URL and restarting is slower than pasting the new
-# URL into /settings. This file, if present, wins over the env var at
-# startup. VoiceStationClient.base_url is a plain mutable attribute read
-# fresh on every call, so updating it at runtime (see /settings/station_url
-# below) takes effect immediately, no restart needed.
+# Live-adjustable clone-voice-station URL: for a local demo where the
+# station is tunnelled through ngrok (a different URL every run), pasting
+# the new URL into /settings beats hardcoding VOICE_STATION_URL and
+# restarting. This file, if present, wins over the env var at startup;
+# VoiceStationClient.base_url is a plain mutable attribute read fresh on
+# every call, so updating it at runtime takes effect immediately.
 STATION_URL_OVERRIDE_PATH = os.path.join(BASE_DIR, "voice_station_url_override.txt")
 
 
@@ -87,23 +76,15 @@ def _load_station_url_override():
     return None
 
 
-# API key: prefer voice_station_key.txt (see HUONG_DAN_DEMO.md §5) over
-# requiring VOICE_STATION_API_KEY to be exported by hand every session --
-# forgetting that step doesn't fail loudly at startup (VoiceStationClient
-# happily constructs with api_key=None), it only surfaces later as "Invalid
-# or missing X-Api-Key" from clone-voice-station on the first /compare
-# request. The env var still wins if both are absent/empty is fine too --
-# VoiceStationClient itself falls back to VOICE_STATION_API_KEY when
-# api_key=None is passed through.
-# upload_timeout governs /transcribe's remote-mode call (see VoiceStationClient.
-# transcribe()) -- the SDK's bare 30s default was cutting off /compare's Lazy
-# side for real: a Colab failure (e.g. a 530 from a dead tunnel) falls back to
-# clone-voice-station's own local PhoWhisper-small, and that fallback's
-# inference time scales with recording length, not just cold-load time -- a
-# longer /compare recording plus the Colab round-trip on top of it can exceed
-# 30s even once PhoWhisper-small is warm. Same class of bug already fixed in
-# rag-legal-assistant's voice/station_client.py (speak_timeout there); this is
-# the STT-transcribe equivalent, not the RVC-speak one.
+# API key: prefer voice_station_key.txt over requiring VOICE_STATION_API_KEY
+# to be exported by hand every session -- forgetting that step doesn't fail
+# loudly at startup, it only surfaces later as "Invalid or missing
+# X-Api-Key" on the first /compare request.
+# upload_timeout governs /transcribe's remote-mode call -- the SDK's bare
+# 30s default was cutting off /compare's remote side: a Colab failure falls
+# back to clone-voice-station's local PhoWhisper-small, whose inference time
+# scales with recording length, so a longer recording plus the Colab
+# round-trip can exceed 30s even once warm.
 _KEY_PATH = os.path.join(BASE_DIR, "voice_station_key.txt")
 _upload_timeout = int(os.getenv("VOICE_STATION_UPLOAD_TIMEOUT", "120"))
 if os.path.isfile(_KEY_PATH):
@@ -113,13 +94,12 @@ if os.path.isfile(_KEY_PATH):
 else:
     voice_client = VoiceStationClient(base_url=_load_station_url_override(), upload_timeout=_upload_timeout)
 
-# ── Local STT packs (ported from rag-legal-assistant's voice/station_client.py) ─
+# ── Local STT packs ──────────────────────────────────────────────────────
 # Multiple .stt-pack.zip files can be uploaded via /settings; at most one is
 # "active" at a time (or none, for plain untrained-Whisper local mode). Disk
-# (index.json) is the source of truth for which pack is active -- checked on
-# every /transcribe call -- with an in-memory cache purely so the (possibly
-# large) LoRA adapter isn't re-extracted/re-loaded from the zip on every
-# single request.
+# (index.json) is the source of truth for which pack is active, checked on
+# every /transcribe call; the in-memory cache just avoids re-extracting the
+# (possibly large) LoRA adapter from the zip on every request.
 STT_PACKS_DIR = os.path.join(BASE_DIR, "stt_pack")
 STT_PACKS_INDEX_PATH = os.path.join(STT_PACKS_DIR, "index.json")
 
@@ -282,9 +262,8 @@ async def upload_stt_local_pack_route(pack: UploadFile = File(...), background_t
         entry = upload_stt_local_pack(pack.filename, content)
     except ValueError as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
-    # The first pack ever uploaded becomes active automatically (see
-    # upload_stt_local_pack) -- pre-warm it too in that case, same as an
-    # explicit activate below.
+    # The first pack ever uploaded becomes active automatically -- pre-warm
+    # it too in that case, same as an explicit activate below.
     if _read_stt_packs_index().get("active_id") == entry["id"]:
         background_tasks.add_task(_get_active_pack_loaded)
     return {"status": "ok", "pack": entry}
@@ -296,10 +275,8 @@ async def activate_stt_local_pack_route(pack_id: str, background_tasks: Backgrou
         set_active_stt_local_pack(pack_id)
     except ValueError as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
-    # Pre-warm in the background so the FIRST recording after switching packs
-    # isn't the one paying for zip-extraction + (Tier 2) loading the base
-    # Whisper model + LoRA adapter into memory -- without this, whichever
-    # /transcribe call happened to land first ate that cost instead.
+    # Pre-warm in the background so the first recording after switching packs
+    # isn't the one paying for zip-extraction + model loading.
     background_tasks.add_task(_get_active_pack_loaded)
     return {"status": "ok"}
 
@@ -345,22 +322,16 @@ async def transcribe_route(audio: UploadFile = File(...), language: str = Form("
     except VoiceStationError as e:
         return {"status": "error", "text": e.message}
     except Exception as e:
-        # Any other failure (e.g. ffmpeg/decoding crashes inside
-        # clone_voice_client.local_stt) must still come back as JSON --
-        # letting it propagate hits Starlette's default handler, which
-        # returns a *plain-text* 500 body that the frontend's res.json()
-        # can't parse ("Unexpected token 'I', "Internal S"... is not valid
-        # JSON"), hiding the real error behind a JS parse error instead.
+        # Any other failure must still come back as JSON -- letting it
+        # propagate hits Starlette's default handler, which returns a
+        # plain-text 500 body the frontend's res.json() can't parse.
         return JSONResponse({"status": "error", "text": str(e)}, status_code=500)
     return {"status": "success", "text": result["text"]}
 
 
 if __name__ == "__main__":
     import uvicorn
-    # Pass the app object directly, not the "app:app" string form — that form
-    # makes uvicorn re-import this module by name even though it's already
-    # running as __main__, which double-runs the startup code above (dataset
-    # download, index build, pack loading). The string form only earns its
-    # keep when reload=True needs a re-importable reference for the reloader
-    # subprocess; with reload=False there's no reason to pay for it.
+    # Pass the app object directly, not the "app:app" string form -- that
+    # form re-imports this module by name, double-running the startup code
+    # above (dataset download, index build, pack loading).
     uvicorn.run(app, host="127.0.0.1", port=8091)
