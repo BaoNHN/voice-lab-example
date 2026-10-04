@@ -84,6 +84,7 @@
 <li><a href="#cot-lazy-phan-hoi-rat-cham-nhieu-giay-du-mang-local">Cột Lazy phản hồi rất chậm (nhiều giây) dù mạng local</a></li>
 </ul>
 </li>
+<li><a href="#9-vai-tro-trong-bo-test-lai-cua-luan-van">9. Vai Trò Trong Bộ Test Lại Của Luận Văn</a></li>
 </ul>
 </li>
 </ul>
@@ -188,6 +189,14 @@ python -c &quot;from database.database import get_setting; print(repr(get_settin
 <p>Nếu không có Colab session nào đang chạy thật, xoá về rỗng:</p>
 <pre><code class="language-bash">python -c &quot;from database.database import set_setting; set_setting('rvc_endpoint', '')&quot;
 </code></pre>
+<h2 id="9-vai-tro-trong-bo-test-lai-cua-luan-van">9. Vai Trò Trong Bộ Test Lại Của Luận Văn</h2>
+<p>voice-lab-example là nguồn của hai thứ mà các luồng ở <code>clone-voice-station/experiments/retest/</code> dùng lại:</p>
+<ul>
+<li>Trang <code>/compare</code> (Figure 7): gửi một bản ghi qua đường local và remote để so độ trễ. Minh hoạ cho <code>flow_03_latency.py</code> (số đo chính chạy bằng SDK, không qua trang này).</li>
+<li>Thư mục <code>stt_pack/</code>: các gói adapter (Tier 1 hotword, Tier 2 LoRA y khoa và VLSP2020). <code>flow_04_legal_wer.py</code> đọc <code>stt_pack/index.json</code> để chọn adapter cho điều kiện <code>medical</code> và <code>vlsp</code>.</li>
+<li><code>tools/test_medical_lora_wer.py</code>: kiểm chứng adapter y khoa trên <code>medical_eval_set</code> (độc lập với bộ 30 câu pháp lý).</li>
+</ul>
+<p>Chạy lại: xem mục 12 của <code>clone-voice-station/HUONG_DAN_DEMO.md</code>. Cần <code>clone-voice-station</code> đang chạy và <code>voice_station_key.txt</code> ở thư mục này.</p>
     <footer>Chuyen doi tu HUONG_DAN_DEMO.md &mdash; xem file goc de biet lich su chinh sua.</footer>
   </main>
 </div>

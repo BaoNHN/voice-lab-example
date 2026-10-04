@@ -135,3 +135,13 @@ Nếu không có Colab session nào đang chạy thật, xoá về rỗng:
 ```bash
 python -c "from database.database import set_setting; set_setting('rvc_endpoint', '')"
 ```
+
+## 9. Vai Trò Trong Bộ Test Lại Của Luận Văn
+
+voice-lab-example là nguồn của hai thứ mà các luồng ở `clone-voice-station/experiments/retest/` dùng lại:
+
+- Trang `/compare` (Figure 7): gửi một bản ghi qua đường local và remote để so độ trễ. Minh hoạ cho `flow_03_latency.py` (số đo chính chạy bằng SDK, không qua trang này).
+- Thư mục `stt_pack/`: các gói adapter (Tier 1 hotword, Tier 2 LoRA y khoa và VLSP2020). `flow_04_legal_wer.py` đọc `stt_pack/index.json` để chọn adapter cho điều kiện `medical` và `vlsp`.
+- `tools/test_medical_lora_wer.py`: kiểm chứng adapter y khoa trên `medical_eval_set` (độc lập với bộ 30 câu pháp lý).
+
+Chạy lại: xem mục 12 của `clone-voice-station/HUONG_DAN_DEMO.md`. Cần `clone-voice-station` đang chạy và `voice_station_key.txt` ở thư mục này.
