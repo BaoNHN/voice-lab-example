@@ -85,6 +85,7 @@
 </ul>
 </li>
 <li><a href="#9-vai-tro-trong-bo-test-lai-cua-luan-van">9. Vai Trò Trong Bộ Test Lại Của Luận Văn</a></li>
+<li><a href="#10-chay-theo-uong-local-khong-can-colab">10. Chạy Theo Đường Local (Không Cần Colab)</a></li>
 </ul>
 </li>
 </ul>
@@ -197,6 +198,23 @@ python -c &quot;from database.database import get_setting; print(repr(get_settin
 <li><code>tools/test_medical_lora_wer.py</code>: kiểm chứng adapter y khoa trên <code>medical_eval_set</code> (độc lập với bộ 30 câu pháp lý).</li>
 </ul>
 <p>Chạy lại: xem mục 12 của <code>clone-voice-station/HUONG_DAN_DEMO.md</code>. Cần <code>clone-voice-station</code> đang chạy và <code>voice_station_key.txt</code> ở thư mục này.</p>
+<h2 id="10-chay-theo-uong-local-khong-can-colab">10. Chạy Theo Đường Local (Không Cần Colab)</h2>
+<p>Các phần trước dùng đường có Colab (<code>rvc_endpoint</code> trỏ tới URL cloudflared/ngrok). Mục này ghi cách chạy khi không có Colab, để dùng lại khi cần.</p>
+<ol>
+<li>Xoá <code>rvc_endpoint</code> của station để nó tự dùng đường local (PhoWhisper-small cho STT, RVC chạy trong tiến trình station):
+<pre><code class="language-bash">cd ../clone-voice-station
+python -c &quot;from database.database import set_setting; set_setting('rvc_endpoint', '')&quot;
+python app.py     # http://127.0.0.1:8090
+</code></pre></li>
+<li>Chạy voice-lab-example như mục 5 (cần <code>VOICE_STATION_API_KEY</code> và <code>CLONE_VOICE_FFMPEG_DIR</code>).</li>
+<li>Trang <code>/compare</code>: cột Local vẫn chạy Whisper trong tiến trình này; cột Lazy giờ đi qua station nhưng station xử lý bằng PhoWhisper-small local, nên chênh lệch giữa hai cột chỉ còn là khác model và một hop HTTP, không còn tunnel và GPU Colab.</li>
+<li>Lượt đầu luôn chậm (nạp model, đo ngày 03/10/2026 là 83 s cho PhoWhisper-small local); bỏ vài lượt đầu trước khi so sánh.</li>
+</ol>
+<p>Chạy lại bộ đo bằng đường local (trong <code>clone-voice-station</code>, xem mục 12 của HUONG_DAN_DEMO.md bên đó):</p>
+<pre><code class="language-bash">python experiments/retest/flow_03_latency.py --path local --n-asr 10 --n-tts 5
+python experiments/retest/flow_04_legal_wer.py --conditions base,hotwords,medical,vlsp
+</code></pre>
+<p><code>flow_04</code> đọc các gói adapter trong <code>stt_pack/</code> của repo này. Hai điều kiện <code>remote</code> (PhoWhisper-large) và độ trễ qua Colab/ngrok vẫn cần bật Colab. Mẫu giọng <code>.webm</code> chỉ đọc được bằng Python của <code>rag_env</code>, cần cho <code>flow_02</code> (speaker similarity).</p>
     <footer>Chuyen doi tu HUONG_DAN_DEMO.md &mdash; xem file goc de biet lich su chinh sua.</footer>
   </main>
 </div>
